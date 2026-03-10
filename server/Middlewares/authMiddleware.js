@@ -93,10 +93,18 @@ async function authMiddleware(req, res, next) {
       token = req.cookies.access_token;
     }
 
+    console.log("Auth Debug:", {
+      hasAuthHeader: !!authHeader,
+      authHeaderStart: authHeader?.substring(0, 20),
+      hasCookie: !!req.cookies?.access_token,
+      tokenLength: token?.length,
+      userAgent: req.headers['user-agent']?.substring(0, 50)
+    });
+
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: "Not authenticated",
+        message: "Not authenticated - no token found",
       });
     }
 
@@ -104,7 +112,7 @@ async function authMiddleware(req, res, next) {
     req.user = payload;            // e.g. { id, email, … }
     return next();
   } catch (err) {
-    console.error("Auth Error:", err);
+    console.error("Auth Error:", err.message);
     return res.status(401).json({
       success: false,
       message: "Session expired. Please login again.",

@@ -49,6 +49,11 @@ app.use("/messages", messageRouter);
 app.use("/notifications", notificationRouter);
 app.use("/location", locationRouter);
 
+// Add dashboard route
+app.get("/dashboard", (req, res) => {
+  res.json({ message: "Dashboard endpoint - implement your dashboard logic here" });
+});
+
 // 404 Handler
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
