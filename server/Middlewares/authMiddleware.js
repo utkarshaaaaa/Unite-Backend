@@ -84,7 +84,7 @@ async function authMiddleware(req, res, next) {
 
     // try Authorization header first
     const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith("Bearer ")) {
+    if (authHeader && authHeader.startsWith("Bearer  ")) {
       token = authHeader.slice(7);
     }
 
@@ -93,29 +93,10 @@ async function authMiddleware(req, res, next) {
       token = req.cookies.access_token;
     }
 
-    // further fallback: token in query or body (helps debugging clients that can't send cookies)
-    if (!token && req.query?.token) {
-      token = req.query.token;
-    }
-    if (!token && req.body?.token) {
-      token = req.body.token;
-    }
-
-    console.log("Auth Debug:", {
-      hasAuthHeader: !!authHeader,
-      authHeaderStart: authHeader?.substring(0, 20),
-      rawCookieHeader: req.headers.cookie,
-      parsedCookie: req.cookies?.access_token,
-      tokenUsed: token ? token.slice(0, 10) + "…" : null,
-      tokenLength: token?.length,
-      userAgent: req.headers['user-agent']?.substring(0, 50)
-    });
-
     if (!token) {
-      // give hint in response for debugging
       return res.status(401).json({
         success: false,
-        message: "Not authenticated - no token found. Send credentials or Authorization header.",
+        message: "Not authenticated",
       });
     }
 
@@ -123,7 +104,7 @@ async function authMiddleware(req, res, next) {
     req.user = payload;            // e.g. { id, email, … }
     return next();
   } catch (err) {
-    console.error("Auth Error:", err.message);
+    console.error("Auth Error:", err);
     return res.status(401).json({
       success: false,
       message: "Session expired. Please login again.",
