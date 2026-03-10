@@ -11,6 +11,13 @@ dotenv.config();
 
 const PRIVATE_KEY = process.env.PASETO_PRIVATE_KEY.replace(/\\n/g, "\n");
 
+
+
+//check API
+router.get("/check", (req, res) => {
+  res.json({ message: "Auth API is working" });
+});
+
 // Register
 router.post("/register", async (req, res) => {
   try {
