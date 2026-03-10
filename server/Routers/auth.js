@@ -108,9 +108,15 @@ router.post("/login", async (req, res) => {
       { expiresIn: "7d" }
     );
 
+    // Determine if connection is secure (account for proxies on Render)
+    const isSecure = process.env.NODE_ENV === "production" || 
+                     req.protocol === "https" || 
+                     req.headers["x-forwarded-proto"] === "https" ||
+                     req.secure;
+
     res.cookie("access_token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production" || req.protocol === "https",
+      secure: isSecure,
       sameSite: "None",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -148,10 +154,16 @@ router.post("/login", async (req, res) => {
 
 // Logout
 router.post("/logout", (req, res) => {
+  // Determine if connection is secure
+  const isSecure = process.env.NODE_ENV === "production" || 
+                   req.protocol === "https" || 
+                   req.headers["x-forwarded-proto"] === "https" ||
+                   req.secure;
+
   res.clearCookie("access_token", {
     httpOnly: true,
     sameSite: "None",
-    secure: process.env.NODE_ENV === "production" || req.protocol === "https",
+    secure: isSecure,
   });
 
   res.json({ message: "Logged out successfully" });
