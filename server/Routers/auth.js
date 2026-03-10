@@ -105,8 +105,10 @@ router.post("/login", async (req, res) => {
     //   maxAge: 7 * 24 * 60 * 60 * 1000,
     // }); for local testing without HTTPS
 
+    // send token back as well so frontend can store/use it if cookies are not available
     return res.status(200).json({
       message: "Login successful",
+      token,
       user: {
         id: user._id,
         userName: user.userName,

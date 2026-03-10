@@ -102,9 +102,10 @@ async function authMiddleware(req, res, next) {
     });
 
     if (!token) {
+      // give hint in response for debugging
       return res.status(401).json({
         success: false,
-        message: "Not authenticated - no token found",
+        message: "Not authenticated - no token found. Send credentials or Authorization header.",
       });
     }
 
