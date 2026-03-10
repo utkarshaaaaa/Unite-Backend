@@ -11,8 +11,6 @@ const messageRouter = require("./Routers/message");
 const notificationRouter = require("./Routers/notification");
 const locationRouter = require("./Routers/location");
 const setupSocket = require("./config/socket");
-
-// Import all schemas to register models with Mongoose
 const User = require("./Schema/User");
 const Group = require("./Schema/Group");
 const Message = require("./Schema/Message");
@@ -24,9 +22,9 @@ const app = express();
 const server = http.createServer(app);
 app.use(
   cors({
-    origin: "https://unite0.onrender.com",//localhost:5173
+    origin: "https://unite0.onrender.com", //localhost:5173
     credentials: true,               
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );

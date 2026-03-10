@@ -84,7 +84,7 @@ async function authMiddleware(req, res, next) {
 
     // try Authorization header first
     const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith("Bearer  ")) {
+    if (authHeader && authHeader.startsWith("Bearer ")) {
       token = authHeader.slice(7);
     }
 

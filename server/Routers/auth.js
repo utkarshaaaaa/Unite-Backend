@@ -93,10 +93,17 @@ router.post("/login", async (req, res) => {
 
     res.cookie("access_token", token, {
       httpOnly: true,
-      secure: false, // true in production (HTTPS)
-      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production" || req.protocol === "https",
+      sameSite: "None",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+
+    //  res.cookie("access_token", token, {
+    //   httpOnly: true,
+    //   secure: false, // true in production (HTTPS)
+    //   sameSite: "lax",
+    //   maxAge: 7 * 24 * 60 * 60 * 1000,
+    // }); for local testing without HTTPS
 
     return res.status(200).json({
       message: "Login successful",
@@ -124,8 +131,8 @@ router.post("/login", async (req, res) => {
 router.post("/logout", (req, res) => {
   res.clearCookie("access_token", {
     httpOnly: true,
-    sameSite: "lax",
-    secure: false,
+    sameSite: "None",
+    secure: process.env.NODE_ENV === "production" || req.protocol === "https",
   });
 
   res.json({ message: "Logged out successfully" });
