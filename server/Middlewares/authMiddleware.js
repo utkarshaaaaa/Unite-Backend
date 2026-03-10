@@ -82,9 +82,9 @@ async function authMiddleware(req, res, next) {
   try {
     let token = null;
 
-    // try Authorization header first
+    // try Authorization header first (correct spacing)
     const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith("Bearer  ")) {
+    if (authHeader && authHeader.startsWith("Bearer ")) {
       token = authHeader.slice(7);
     }
 
@@ -93,10 +93,29 @@ async function authMiddleware(req, res, next) {
       token = req.cookies.access_token;
     }
 
+    // query/body fallback for debugging
+    if (!token && req.query?.token) {
+      token = req.query.token;
+    }
+    if (!token && req.body?.token) {
+      token = req.body.token;
+    }
+
+    console.log("Auth Debug:", {
+      hasAuthHeader: !!authHeader,
+      authHeaderStart: authHeader?.substring(0, 20),
+      rawCookieHeader: req.headers.cookie,
+      parsedCookie: req.cookies?.access_token,
+      tokenUsed: token ? token.slice(0, 10) + "…" : null,
+      tokenLength: token?.length,
+      userAgent: req.headers['user-agent']?.substring(0, 50)
+    });
+
     if (!token) {
+      // give hint in response for debugging
       return res.status(401).json({
         success: false,
-        message: "Not authenticated",
+        message: "Not authenticated - no token found. Send credentials or Authorization header.",
       });
     }
 
