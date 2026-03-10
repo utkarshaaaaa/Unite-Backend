@@ -24,10 +24,10 @@ const app = express();
 const server = http.createServer(app);
 app.use(
   cors({
-    origin: "https://unite0.onrender.com", //localhost:5173
-    credentials: false,               
+    origin: "https://unite0.onrender.com",//localhost:5173
+    credentials: true,               
     methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 app.use(express.json());
