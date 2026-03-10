@@ -24,8 +24,8 @@ const app = express();
 const server = http.createServer(app);
 app.use(
   cors({
-    origin: "https://unite0.onrender.com", //ocalhost:5173
-    credentials: true,               
+    origin: "https://unite0.onrender.com", //localhost:5173
+    credentials: false,               
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type"],
   })
