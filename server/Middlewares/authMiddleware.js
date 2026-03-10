@@ -93,10 +93,20 @@ async function authMiddleware(req, res, next) {
       token = req.cookies.access_token;
     }
 
+    // further fallback: token in query or body (helps debugging clients that can't send cookies)
+    if (!token && req.query?.token) {
+      token = req.query.token;
+    }
+    if (!token && req.body?.token) {
+      token = req.body.token;
+    }
+
     console.log("Auth Debug:", {
       hasAuthHeader: !!authHeader,
       authHeaderStart: authHeader?.substring(0, 20),
-      hasCookie: !!req.cookies?.access_token,
+      rawCookieHeader: req.headers.cookie,
+      parsedCookie: req.cookies?.access_token,
+      tokenUsed: token ? token.slice(0, 10) + "…" : null,
       tokenLength: token?.length,
       userAgent: req.headers['user-agent']?.substring(0, 50)
     });
