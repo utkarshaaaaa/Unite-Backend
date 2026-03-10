@@ -108,7 +108,10 @@ async function authMiddleware(req, res, next) {
       parsedCookie: req.cookies?.access_token,
       tokenUsed: token ? token.slice(0, 10) + "…" : null,
       tokenLength: token?.length,
-      userAgent: req.headers['user-agent']?.substring(0, 50)
+      userAgent: req.headers['user-agent']?.substring(0, 50),
+      protocol: req.protocol,
+      secure: req.secure,
+      origin: req.headers.origin
     });
 
     if (!token) {

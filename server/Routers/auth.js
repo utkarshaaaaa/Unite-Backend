@@ -16,6 +16,23 @@ router.get("/check", (req, res) => {
   res.json({ message: "Auth API is working" });
 });
 
+// Debug endpoint to check request details
+router.get("/debug", (req, res) => {
+  res.json({
+    message: "Debug info",
+    headers: {
+      cookie: req.headers.cookie,
+      authorization: req.headers.authorization,
+      userAgent: req.headers['user-agent']
+    },
+    cookies: req.cookies,
+    protocol: req.protocol,
+    secure: req.secure,
+    query: req.query,
+    body: req.body
+  });
+});
+
 // Register
 router.post("/register", async (req, res) => {
   try {
