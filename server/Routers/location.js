@@ -89,10 +89,7 @@ router.post("/reverse-geocode", async (req, res) => {
   }
 });
 
-/**
- * GET /location/search?query=Mumbai
- * Search for places/addresses
- */
+//get location suggestions based on query and optional coordinates for better relevance
 router.get("/search", authMiddleware, async (req, res) => {
   try {
     const { query, latitude, longitude } = req.query;
@@ -120,10 +117,7 @@ router.get("/search", authMiddleware, async (req, res) => {
   }
 });
 
-/**
- * GET /location/place/:placeId
- * Get detailed information about a place
- */
+//Get place details by placeId
 router.get("/place/:placeId", authMiddleware, async (req, res) => {
   try {
     const { placeId } = req.params;

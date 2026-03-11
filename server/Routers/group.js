@@ -1,4 +1,3 @@
-
 const express = require("express");
 const router = express.Router();
 const Group = require("../Schema/Group");
@@ -45,7 +44,8 @@ router.post("/create", authMiddleware, async (req, res) => {
     // Validate location coordinates
     if (!location.coordinates || location.coordinates.length !== 2) {
       return res.status(400).json({
-        message: "Valid location coordinates [longitude, latitude] are required",
+        message:
+          "Valid location coordinates [longitude, latitude] are required",
       });
     }
 
@@ -89,7 +89,7 @@ router.post("/create", authMiddleware, async (req, res) => {
 
     const populatedGroup = await Group.findById(group._id).populate(
       "creator",
-      "userName profileImageUrl"
+      "userName profileImageUrl",
     );
 
     res.status(201).json({
@@ -114,7 +114,9 @@ router.get("/nearby", authMiddleware, async (req, res) => {
     }
 
     const maxDist =
-      parseInt(maxDistance) || parseInt(process.env.MAX_SEARCH_DISTANCE) || 50000;
+      parseInt(maxDistance) ||
+      parseInt(process.env.MAX_SEARCH_DISTANCE) ||
+      50000;
 
     const query = {
       isPrivate: false,
@@ -145,7 +147,7 @@ router.get("/nearby", authMiddleware, async (req, res) => {
         parseFloat(latitude),
         parseFloat(longitude),
         group.location.coordinates[1],
-        group.location.coordinates[0]
+        group.location.coordinates[0],
       );
 
       return {
@@ -206,7 +208,6 @@ router.get("/search", authMiddleware, async (req, res) => {
         groups = [];
       }
 
-      // ── Strategy 2: Regex fallback – catches partial / case-insensitive ──
       // Runs when text search returns nothing OR when text index not available.
       if (groups.length === 0) {
         const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -215,11 +216,11 @@ router.get("/search", authMiddleware, async (req, res) => {
           ...base,
           isPrivate: false,
           $or: [
-            { groupName:    re },
-            { description:  re },
+            { groupName: re },
+            { description: re },
             { locationName: re },
-            { category:     re },
-            { tags:         re },
+            { category: re },
+            { tags: re },
           ],
         })
           .populate("creator", "userName profileImageUrl")
@@ -258,7 +259,7 @@ router.get("/:groupId", authMiddleware, async (req, res) => {
 
     if (group.isPrivate) {
       const isMember = group.members.some(
-        (member) => member.user._id.toString() === req.user.id
+        (member) => member.user._id.toString() === req.user.id,
       );
       const isCreator = group.creator._id.toString() === req.user.id;
 
@@ -287,10 +288,10 @@ router.post("/:groupId/invite/:userId", authMiddleware, async (req, res) => {
       return res.status(404).json({ message: "Group not found" });
     }
 
-  
     const isCreator = group.creator.toString() === req.user.id;
     const isMember = group.members.some(
-      (member) => member.user.toString() === req.user.id && member.status === 'approved'
+      (member) =>
+        member.user.toString() === req.user.id && member.status === "approved",
     );
 
     if (!isCreator && !isMember) {
@@ -301,7 +302,7 @@ router.post("/:groupId/invite/:userId", authMiddleware, async (req, res) => {
 
     // Check if user is already a member
     const alreadyMember = group.members.some(
-      (member) => member.user.toString() === userId
+      (member) => member.user.toString() === userId,
     );
 
     if (alreadyMember) {
@@ -319,7 +320,7 @@ router.post("/:groupId/invite/:userId", authMiddleware, async (req, res) => {
 
     group.members.push({
       user: userId,
-      status: 'invited', // or 'pending' based on status
+      status: "invited", // or 'pending' based on status
       joinedAt: new Date(),
     });
 
@@ -330,7 +331,7 @@ router.post("/:groupId/invite/:userId", authMiddleware, async (req, res) => {
       recipient: userId,
       sender: req.user.id,
       group: groupId,
-      type: 'group_invite',
+      type: "group_invite",
       message: `You've been invited to join ${group.groupName}`,
     });
 
@@ -367,15 +368,20 @@ router.post("/:groupId/join", authMiddleware, async (req, res) => {
 
     // Check if already a member
     const isMember = group.members.some(
-      (member) => member.user.toString() === req.user.id
+      (member) => member.user.toString() === req.user.id,
     );
 
     if (isMember) {
-      return res.status(400).json({ message: "Already a member of this group" });
+      return res
+        .status(400)
+        .json({ message: "Already a member of this group" });
     }
 
     // Check max participants
-    if (group.maxParticipants && group.members.length >= group.maxParticipants) {
+    if (
+      group.maxParticipants &&
+      group.members.length >= group.maxParticipants
+    ) {
       return res.status(400).json({ message: "Group is full" });
     }
 
@@ -443,16 +449,18 @@ router.post("/:groupId/request", authMiddleware, async (req, res) => {
 
     // Check if already a member
     const isMember = group.members.some(
-      (member) => member.user.toString() === req.user.id
+      (member) => member.user.toString() === req.user.id,
     );
 
     if (isMember) {
-      return res.status(400).json({ message: "Already a member of this group" });
+      return res
+        .status(400)
+        .json({ message: "Already a member of this group" });
     }
 
     // Check if already requested
     const hasRequested = group.pendingRequests.some(
-      (request) => request.user.toString() === req.user.id
+      (request) => request.user.toString() === req.user.id,
     );
 
     if (hasRequested) {
@@ -507,7 +515,7 @@ router.post("/:groupId/accept/:userId", authMiddleware, async (req, res) => {
 
     // Find the pending request
     const requestIndex = group.pendingRequests.findIndex(
-      (request) => request.user.toString() === userId
+      (request) => request.user.toString() === userId,
     );
 
     if (requestIndex === -1) {
@@ -515,7 +523,10 @@ router.post("/:groupId/accept/:userId", authMiddleware, async (req, res) => {
     }
 
     // Check max participants
-    if (group.maxParticipants && group.members.length >= group.maxParticipants) {
+    if (
+      group.maxParticipants &&
+      group.members.length >= group.maxParticipants
+    ) {
       return res.status(400).json({ message: "Group is full" });
     }
 
@@ -570,9 +581,9 @@ router.post("/:groupId/reject/:userId", authMiddleware, async (req, res) => {
         message: "Only the group creator can reject join requests",
       });
     }
- 
+
     const requestIndex = group.pendingRequests.findIndex(
-      (request) => request.user.toString() === userId
+      (request) => request.user.toString() === userId,
     );
 
     if (requestIndex === -1) {
@@ -591,31 +602,34 @@ router.post("/:groupId/reject/:userId", authMiddleware, async (req, res) => {
   }
 });
 
-
 //Accept group Invite
 router.post("/:groupId/accept-invite", authMiddleware, async (req, res) => {
   try {
     const { groupId } = req.params;
     const group = await Group.findById(groupId);
 
-    if (!group)           return res.status(404).json({ message: "Group not found" });
-    if (!group.isActive)  return res.status(400).json({ message: "Group is no longer active" });
+    if (!group) return res.status(404).json({ message: "Group not found" });
+    if (!group.isActive)
+      return res.status(400).json({ message: "Group is no longer active" });
 
-    
     const memberEntry = group.members.find(
-      (m) => m.user.toString() === req.user.id && m.status === "invited"
+      (m) => m.user.toString() === req.user.id && m.status === "invited",
     );
 
     if (!memberEntry) {
-      return res.status(404).json({ message: "No pending invite found for this group" });
+      return res
+        .status(404)
+        .json({ message: "No pending invite found for this group" });
     }
 
-    const joinedCount = group.members.filter((m) => m.status === "joined").length;
+    const joinedCount = group.members.filter(
+      (m) => m.status === "joined",
+    ).length;
     if (group.maxParticipants && joinedCount >= group.maxParticipants) {
       return res.status(400).json({ message: "Group is full" });
     }
 
-    memberEntry.status   = "joined";
+    memberEntry.status = "joined";
     memberEntry.joinedAt = new Date();
     await group.save();
 
@@ -626,16 +640,16 @@ router.post("/:groupId/accept-invite", authMiddleware, async (req, res) => {
     // Notify the creator
     await Notification.create({
       recipient: group.creator,
-      sender:    req.user.id,
-      type:      "new_member",
-      group:     group._id,
-      message:   `${req.user.userName} accepted your invite to "${group.groupName}"`,
+      sender: req.user.id,
+      type: "new_member",
+      group: group._id,
+      message: `${req.user.userName} accepted your invite to "${group.groupName}"`,
     });
 
     if (req.io) {
       req.io.to(groupId).emit("member_joined", {
-        groupId:  group._id,
-        userId:   req.user.id,
+        groupId: group._id,
+        userId: req.user.id,
         userName: req.user.userName,
       });
     }
@@ -658,11 +672,13 @@ router.post("/:groupId/reject-invite", authMiddleware, async (req, res) => {
     if (!group) return res.status(404).json({ message: "Group not found" });
 
     const memberIndex = group.members.findIndex(
-      (m) => m.user.toString() === req.user.id && m.status === "invited"
+      (m) => m.user.toString() === req.user.id && m.status === "invited",
     );
 
     if (memberIndex === -1) {
-      return res.status(404).json({ message: "No pending invite found for this group" });
+      return res
+        .status(404)
+        .json({ message: "No pending invite found for this group" });
     }
 
     // Remove the invited entry entirely
@@ -672,10 +688,10 @@ router.post("/:groupId/reject-invite", authMiddleware, async (req, res) => {
     // Let the creator know the invite was declined
     await Notification.create({
       recipient: group.creator,
-      sender:    req.user.id,
-      type:      "request_rejected",
-      group:     group._id,
-      message:   `${req.user.userName} declined your invite to "${group.groupName}"`,
+      sender: req.user.id,
+      type: "request_rejected",
+      group: group._id,
+      message: `${req.user.userName} declined your invite to "${group.groupName}"`,
     });
 
     res.json({ message: "Invite declined." });
@@ -706,14 +722,15 @@ router.post("/:groupId/leave", authMiddleware, async (req, res) => {
 
     // Find member index
     const memberIndex = group.members.findIndex(
-      (member) => member.user.toString() === req.user.id
+      (member) => member.user.toString() === req.user.id,
     );
 
     if (memberIndex === -1) {
-      return res.status(400).json({ message: "You are not a member of this group" });
+      return res
+        .status(400)
+        .json({ message: "You are not a member of this group" });
     }
 
-    // Remove member
     group.members.splice(memberIndex, 1);
     await group.save();
 
@@ -740,7 +757,6 @@ router.post("/:groupId/leave", authMiddleware, async (req, res) => {
   }
 });
 
-
 // Remove a member from group (creator only)
 router.delete("/:groupId/members/:userId", authMiddleware, async (req, res) => {
   try {
@@ -751,14 +767,12 @@ router.delete("/:groupId/members/:userId", authMiddleware, async (req, res) => {
       return res.status(404).json({ message: "Group not found" });
     }
 
-   
     if (group.creator.toString() !== req.user.id) {
       return res.status(403).json({
         message: "Only the group creator can remove members",
       });
     }
 
-    
     if (userId === req.user.id) {
       return res.status(400).json({
         message: "Creator cannot remove themselves from the group",
@@ -766,11 +780,13 @@ router.delete("/:groupId/members/:userId", authMiddleware, async (req, res) => {
     }
 
     const memberIndex = group.members.findIndex(
-      (member) => member.user.toString() === userId
+      (member) => member.user.toString() === userId,
     );
 
     if (memberIndex === -1) {
-      return res.status(404).json({ message: "Member not found in this group" });
+      return res
+        .status(404)
+        .json({ message: "Member not found in this group" });
     }
 
     group.members.splice(memberIndex, 1);
@@ -912,7 +928,7 @@ router.delete("/:groupId", authMiddleware, async (req, res) => {
     const memberIds = group.members.map((m) => m.user);
     await User.updateMany(
       { _id: { $in: memberIds } },
-      { $pull: { userGroupsJoined: group._id } }
+      { $pull: { userGroupsJoined: group._id } },
     );
 
     // Remove from creator's created groups
@@ -980,7 +996,7 @@ router.get("/user/my-groups", authMiddleware, async (req, res) => {
 
 router.get("/user/upcoming-events", authMiddleware, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id)
+    const user = await User.findById(req.user.id);
     const userGroups = await Group.find({
       _id: { $in: user.userGroupsJoined },
       isActive: true,
@@ -989,17 +1005,52 @@ router.get("/user/upcoming-events", authMiddleware, async (req, res) => {
     const now = new Date();
     const upcomingEvents = userGroups.filter((group) => {
       const eventDateTime = new Date(
-        `${group.meetingDate}T${group.meetingTime}`
+        `${group.meetingDate}T${group.meetingTime}`,
       );
       return eventDateTime > now && eventDateTime - now <= 24 * 60 * 60 * 1000;
     });
     res.json({ upcomingEvents });
-  }
-  catch (err) {
+  } catch (err) {
     console.error("Get upcoming events error:", err);
     res.status(500).json({ message: "Server Error", error: err.message });
   }
 });
 
-module.exports = router;
+// Delete the group if the event is done and notify the user in notification section about the event is done and the group is deleted
+router.delete("/cleanup/past-events", async (req, res) => {
+  try {
+    const now = new Date();//current date and time
+    const pastGroups = await Group.find({
+      isActive: true,
+      $expr: {
+        $lt: [
+          {
+            $dateFromString: {
+              dateString: {
+                $concat: ["$meetingDate", "T", "$meetingTime"],
+              },
+            },
+          },
+          now,
+        ],
+      },
+    });
 
+    for (const group of pastGroups) {
+      group.isActive = false;
+      await group.save();
+
+      const memberIds = group.members.map((m) => m.user);
+      await User.updateMany(
+        { _id: { $in: memberIds } },
+        { $pull: { userGroupsJoined: group._id } }
+      );
+    }
+    res.json({ message:"Past events cleaned up successfully" });
+  } catch (err) {
+    console.error("Cleanup past events error:", err);
+    res.status(500).json({ message: "Server Error", error: err.message });
+  }
+});
+
+module.exports = router;

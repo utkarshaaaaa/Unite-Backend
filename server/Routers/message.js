@@ -180,7 +180,7 @@ router.delete("/:messageId", authMiddleware, async (req, res) => {
 
     const groupId = message.group.toString();
     await Message.findByIdAndDelete(messageId);
-
+ 
     if (req.io) {
       req.io.to(groupId).emit("message_deleted", {
         messageId: message._id,
