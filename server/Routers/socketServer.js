@@ -180,11 +180,8 @@ require("dotenv").config();
 
 const PUBLIC_KEY = process.env.PASETO_PUBLIC_KEY?.replace(/\\n/g, "\n");
 
-// ── In-memory state ──────────────────────────────────────────────────────────
-// groupId  → Set<socketId>
 const roomMembers = new Map();
 
-// socketId → { userId, userName, groupIds: Set<groupId> }
 const socketMeta  = new Map();
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -259,7 +256,7 @@ function initSocket(httpServer) {
       groupIds: new Set(),
     });
 
-    // ── join_group ───────────────────────────────────────────────────────────
+    // join_group
     socket.on("join_group", (groupId) => {
       if (!groupId) return;
       const gid = String(groupId);
@@ -275,7 +272,7 @@ function initSocket(httpServer) {
       console.log(`[socket] ${socket.id} joined  group=${gid}  size=${roomMembers.get(gid).size}`);
     });
 
-    // ── leave_group ──────────────────────────────────────────────────────────
+    // leave_group 
     socket.on("leave_group", (groupId) => {
       if (!groupId) return;
       const gid  = String(groupId);
@@ -295,14 +292,13 @@ function initSocket(httpServer) {
       console.log(`[socket] ${socket.id} left    group=${gid}`);
     });
 
-    // ── send_message (direct socket fallback) ────────────────────────────────
-    // Normal path: frontend → REST POST /messages/:groupId → req.io.emit
+    // send_message (direct socket fallback)
     socket.on("send_message", ({ groupId, message } = {}) => {
       if (!groupId || !message) return;
       io.to(String(groupId)).emit("new_message", message);
     });
 
-    // ── typing_start ─────────────────────────────────────────────────────────
+    // typing_start
     socket.on("typing_start", ({ groupId, userId: uid, userName: uname } = {}) => {
       if (!groupId) return;
       const gid  = String(groupId);
@@ -325,7 +321,6 @@ function initSocket(httpServer) {
       });
     });
 
-    // ── typing_stop ──────────────────────────────────────────────────────────
     socket.on("typing_stop", ({ groupId, userId: uid } = {}) => {
       if (!groupId) return;
       const meta       = socketMeta.get(socket.id);
