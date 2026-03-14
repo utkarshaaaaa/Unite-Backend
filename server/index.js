@@ -94,8 +94,8 @@ const io = initSocket(server);
 
 const allowedOrigins = [
   "https://unite0.onrender.com",
-  "http://localhost:5173", // Vite
-  "http://localhost:3000", // CRA
+  "http://localhost:5173", 
+  "http://localhost:3000", 
 ];
 
 app.use(
