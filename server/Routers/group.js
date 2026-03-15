@@ -1053,4 +1053,19 @@ router.delete("/cleanup/past-events", async (req, res) => {
   }
 });
 
+
+// Total number of active public groups currently for the Login page display
+
+router.get("/stats/total-groups-user", async (req, res) => {
+  try {
+    const totalPublicGroups = await Group.countDocuments({ isPrivate: false, isActive: true });
+    const totalUsers = await User.countDocuments({ isActive: true });
+    res.json({ totalPublicGroups, totalUsers });
+  } catch (err) {
+    console.error("Get total groups error:", err);
+    res.status(500).json({ message: "Server Error", error: err.message });
+  }
+});
+
+
 module.exports = router;
